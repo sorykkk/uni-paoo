@@ -1,3 +1,0 @@
-General idea of the simple library: 
-	* make a simple 2d plot library 
-	* user gives an input of a function, and maybe a set of x points and it will print them

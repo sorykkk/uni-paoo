@@ -1,14 +1,9 @@
 # src/
-add_library(image_box STATIC)
-
-target_include_directories(image_box PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-)
-
-target_sources(image_box PRIVATE
+add_library(image_box STATIC
     image.cpp
 )
 
-target_link_libraries(image_box PRIVATE
-    image_box_settings
+target_include_directories(image_box PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/external
 )

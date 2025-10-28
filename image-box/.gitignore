@@ -1,0 +1,5 @@
+output/*
+*build*/
+
+# editor
+.vscode/
