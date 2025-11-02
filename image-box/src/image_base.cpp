@@ -34,10 +34,13 @@ ImageBase& ImageBase::operator=(const ImageBase& other) {
     return *this;
 }
 
-// TODO: explain why here creation time has no move
 ImageBase::ImageBase(ImageBase&& other) noexcept
     : _name(std::move(other._name)),
       _format(std::move(other._format)),
+      // _creationTime cannot be moved, because it is a primitive
+      // and primitives don't have move semantics, even though 
+      // the _creationTime(std::move(other._creationTime)) is possible
+      // it still will involve copying
       _creationTime(other._creationTime) {
 
     other._creationTime = 0;

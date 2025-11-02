@@ -17,7 +17,13 @@ protected:
 
 public:
     ImageBase(const std::string& name = "untitled", const std::string& format = "unknown");
-    // TODO: explain later why i do destructor virtual
+    /**
+     * Destructor for base classes usually should be declared virtual to be implemented by 
+     * derived classes.
+     * Suppose that the base class wouldn't be virtual. Then when an object: ImageBase *bobj = Image(10, 10), 
+     * would be declared, then at the destruction, it will have memory leaks, because implementation of 
+     * base destructor would be invoked, not the derived one.
+     */
     virtual ~ImageBase();
 
     // copy constructor
