@@ -9,72 +9,99 @@
 #include <iostream>
 #include <algorithm>
 
-Image::Image(int width, int height) 
-    : _width(width), _height(height) {
+Image::Image(int width, int height, const std::string& name) 
+    : ImageBase(name, "raw"), _width(width), _height(height) {
     size_t size = _width * _height * 3; // RGB
     _data = new uint8_t[size];
     std::memset(_data, 0, size);
-    std::cout << "Constructor: allocated " << size << " bytes\n";
+    std::cout << "[Image] Constructor: allocated " << size << " bytes\n";
 }
 
-Image::Image(Image&& other) noexcept 
-    : _width(other._width), _height(other._height), _data(other._data) {
-    other._width = 0;
-    other._height = 0;
-    other._data = nullptr;
-    std::cout << "Move Constructor: transferred ownership of image data\n";
-}
+void Image::copyImageData(const Image& other) {
+    _width = other._width;
+    _height = other._height;
+    _compressionQuality = other._compressionQuality;
 
-Image::~Image() {
-    delete[] _data;
-    std::cout << "Destructor: deallocated image data\n";
-}
-
-Image::Image(const Image& other)
-    : _width(other._width), _height(other._height) {
+    // Deep copy the pixel data
     size_t size = _width * _height * 3;
     _data = new uint8_t[size];
     std::memcpy(_data, other._data, size);
-    std::cout << "Copy Constructor: allocated and copied " << size << " bytes\n";
+
+    std::cout << "[Image] copyImageData: copied all members and " << size << " bytes of data\n";
+}
+
+void Image::cleanup() {
+    delete[] _data;
+    _data = nullptr;
+    _width = 0;
+    _height = 0;
+}
+
+Image::Image(Image&& other) noexcept 
+    : ImageBase(std::move(other)),
+      _width(other._width), 
+      _height(other._height), 
+      _data(other._data),
+      _compressionQuality(other._compressionQuality) {
+    other._width = 0;
+    other._height = 0;
+    other._data = nullptr;
+    other._compressionQuality = 90;
+
+    std::cout << "[Image] Move Constructor: transferred ownership of image data\n";
+}
+
+Image::~Image() {
+    cleanup();
+    std::cout << "[Image] Destructor: deallocated image data\n";
+}
+
+Image::Image(const Image& other)
+    : ImageBase(other) {
+    copyImageData(other);
+    std::cout << "[Image] Copy Constructor: completed\n";
 }
 
 Image& Image::operator=(const Image& other) {
-    if (this != &other) {
-        delete[] _data;
+    if (this != &other) {   // handle assing to self
+        // Copy base class parts
+        ImageBase::operator=(other);
+        // clean up old data
+        cleanup();
+        // copy derived class parts using helper
+        copyImageData(other);
 
-        _width = other._width;
-        _height = other._height;
-        size_t size = _width * _height * 3;
-        _data = new uint8_t[size];
-        std::memcpy(_data, other._data, size);
-        std::cout << "Copy Assignment: allocated and copied " << size << " bytes\n";
+        std::cout << "[Image] Copy Assignment: completed\n";
     }
-    return *this;
+    return *this;   // always return *this for chain assignment
 }
 
+// noexcept qualifier here is more of the good practice i got from the work env
+// Generally it means that we guarantee the compiler that this code won't throw 
+// or propagate any exceptions (eliminating the need for it to keep the tracestack)
+// this allows speed optimization
+// half of stl containers use move semantics if the assign operator is noexcept
+// but if there was no noexcept then it would use copy assing which is more expensive
+// example:
+//  v.push_back(Image(100, 100)); -> will use move assign if noexcept
+//                                -> will use copy assign if noexcept is not present
 Image& Image::operator=(Image&& other) noexcept {
     if (this != &other) {
-        delete[] _data;
-
+        ImageBase::operator=(std::move(other));
+        cleanup();
         _width = other._width;
         _height = other._height;
         _data = other._data;
+        _compressionQuality = other._compressionQuality;
 
         other._width = 0;
         other._height = 0;
         other._data = nullptr;
+        other._compressionQuality = 90;
 
-        std::cout << "Move Assignment: transferred ownership of image data\n";
+        std::cout << "[Image] Move Assignment: transferred ownership of image data\n";
     }
     return *this;
-}
-
-uint32_t Image::getWidth() const {
-    return _width;
-}
-
-uint32_t Image::getHeight() const {
-    return _height;
 }
 
 bool Image::loadFromFile(const std::string& path) {
@@ -96,6 +123,10 @@ bool Image::loadFromFile(const std::string& path) {
 
     std::memcpy(_data, img, size);
     stbi_image_free(img);
+
+    std::string ext = path.substr(path.find_last_of(".") + 1);
+    setFormat(ext);
+
     std::cout << "Loaded image from: " << path << " (" << _width << "x" << _height << ")\n";
     return true;
 }
