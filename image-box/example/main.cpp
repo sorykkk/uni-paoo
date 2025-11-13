@@ -22,11 +22,12 @@ Image LoadAndProcess(const std::string& filepath) {
 
 int main() {
     std::cout << "=== 1. Factory Function ===\n";
-    Image img1 = createImage(100, 100, "factory_image");
+    Image img1 = createImage(100, 100, "factory_image"); // NRVO
     std::cout << "Image created with name: " << img1.getName() << "\n\n";
 
     std::cout << "=== 2. Function return ===\n";
-    Image img2 = LoadAndProcess("example/images/input.jpg");
+    Image img2(10, 10);
+    img2 = LoadAndProcess("example/images/input.jpg");
     std::cout << "Image processed with name: " << img2.getName() << "\n\n";
 
     std::cout << "=== 3. Vector push_back ===\n";
