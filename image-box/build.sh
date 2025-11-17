@@ -1,1 +1,1 @@
-cmake -S . -B build && cmake --build build -j12 && ./build/bin/image_box_example
+cmake -S . -Bbuild && cmake --build build -j12
