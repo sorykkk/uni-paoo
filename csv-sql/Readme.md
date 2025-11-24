@@ -1,5 +1,5 @@
-# Fast SQL like engine
-**Fast SQL like engine** is a mini library that has the purpose of replicating the idea of SQL engine, but done upon a csv files.
+# CSV SQL like engine
+**CSV SQL like engine** is a mini library that has the purpose of replicating the idea of SQL engine, but done upon a CSV files.
 
 ---
 
@@ -21,7 +21,7 @@ This library is developed to experiment with **objects that manage resources** a
 ## Installation & build
 ```bash
 git clone https://github.com/sorykkk/uni-paoo.git
-cd uni-paoo/fast-sql
+cd uni-paoo/csv-sql
 cmake -S . -Bbuild && cmake --build build -j
 
 

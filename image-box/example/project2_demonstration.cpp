@@ -78,6 +78,8 @@ int main() {
         Image copy(original);  // Calls ImageBase copy ctor + copyImageData()
         std::cout << "Original: " << original.getName() << ", " << original.getFormat() 
                   << ", quality=" << original.getCompressionQuality() << "\n";
+        // if there wasn't initialization for base class members
+        // then name, format and creationTime would be garbage values
         std::cout << "Copy: " << copy.getName() << ", " << copy.getFormat() 
                   << ", quality=" << copy.getCompressionQuality() << "\n";
         std::cout << "All parts copied correctly\n\n";
