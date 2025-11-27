@@ -1,14 +1,15 @@
 #include "table.h"
 #include <fstream>
 #include <thread>
+#include <sstream>
 
 namespace csvdb {
 
 // Static mutex for console I/O protection
-static std::mutex console_mutex;
+// static std::mutex console_mutex;
 
 void CSVTable::print(size_t max_rows) {
-    std::lock_guard<std::mutex> lock(console_mutex);
+    // std::lock_guard<std::mutex> lock(console_mutex);
     std::cout << "Headers: ";
     for(const auto& h: headers) {
         std::cout << h << " | ";
@@ -34,7 +35,7 @@ size_t CSVTable::getColumnCount() const { return headers.size(); }
 bool CSVTable::saveToFile(const std::string& filename) const {
     std::ofstream file(filename);
     if (!file.is_open()) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Error opening file for writing: " << filename << std::endl;
         return false;
     }
@@ -79,10 +80,10 @@ Row CSVTable::parseCSVLine(const std::string& line) {
     return row;
 }
 
-bool CSVDatabase::loadFromFile(const std::string& filename) override {
+bool CSVDatabase::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if(!file.is_open()) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Error opening file: " << filename << std::endl;
         return false;
     }
@@ -102,10 +103,10 @@ bool CSVDatabase::loadFromFile(const std::string& filename) override {
     return true;
 }
 
-bool FastCSVDatabase::loadFromFile(const std::string& filename) override {
+bool FastCSVDatabase::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if(!file.is_open()) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Error opening file: " << filename << std::endl;
         return false;
     }
@@ -146,7 +147,7 @@ bool FastCSVDatabase::loadFromFile(const std::string& filename) override {
 
 }
 
-std::shared_ptr<CSVTable> CSVDatabase::sort(const std::string& column, bool ascending) override {
+std::shared_ptr<CSVTable> CSVDatabase::sort(const std::string& column, bool ascending) {
     // Sequential sort implementation
     auto result = std::make_shared<CSVTable>();
     result->headers = headers;
@@ -154,7 +155,7 @@ std::shared_ptr<CSVTable> CSVDatabase::sort(const std::string& column, bool asce
 
     int col_idx = getColumnIndex(column);
     if (col_idx == -1) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Column not found for sort" << std::endl;
         return result;
     }
@@ -218,14 +219,14 @@ void FastCSVDatabase::merge(std::shared_ptr<Table>& table, size_t left, size_t m
     }
 }
 
-std::shared_ptr<CSVTable> FastCSVDatabase::sort(const std::string& column, bool ascending) override {
+std::shared_ptr<CSVTable> FastCSVDatabase::sort(const std::string& column, bool ascending) {
     auto result = std::make_shared<CSVTable>();
     result->headers = headers;
     result->data = std::make_shared<Table>(*data);
 
     int col_idx = getColumnIndex(column);
     if (col_idx == -1) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Column not found for sort" << std::endl;
         return result;
     }
@@ -245,13 +246,13 @@ std::shared_ptr<CSVTable> FastCSVDatabase::sort(const std::string& column, bool 
     return result;
 }
 
-std::shared_ptr<CSVTable> CSVDatabase::filter(const std::string& column, const std::string& value) override {
+std::shared_ptr<CSVTable> CSVDatabase::filter(const std::string& column, const std::string& value) {
     auto result = std::make_shared<CSVTable>();
     result->headers = headers;
 
     int col_idx = getColumnIndex(column);
     if (col_idx == -1) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Column not found for filter" << std::endl;
         return result;
     }
@@ -265,13 +266,14 @@ std::shared_ptr<CSVTable> CSVDatabase::filter(const std::string& column, const s
     return result;
 }
 
-std::shared_ptr<CSVTable> FastCSVDatabase::filter(const std::string& column, const std::string& value) override {
+// what it filters?
+std::shared_ptr<CSVTable> FastCSVDatabase::filter(const std::string& column, const std::string& value) {
     auto result = std::make_shared<CSVTable>();
     result->headers = headers;
 
     int col_idx = getColumnIndex(column);
     if (col_idx == -1) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Column not found for filter" << std::endl;
         return result;
     }
@@ -312,7 +314,7 @@ std::shared_ptr<CSVTable> FastCSVDatabase::filter(const std::string& column, con
 
 std::shared_ptr<CSVTable> CSVDatabase::join(const std::shared_ptr<CSVTable>& other,
                                               const std::string& left_col,
-                                              const std::string& right_col) override {
+                                              const std::string& right_col) {
     auto result = std::make_shared<CSVTable>();
     result->headers = headers;
     result->headers.insert(result->headers.end(), other->headers.begin(), other->headers.end());
@@ -321,7 +323,7 @@ std::shared_ptr<CSVTable> CSVDatabase::join(const std::shared_ptr<CSVTable>& oth
     int right_idx = other->getColumnIndex(right_col);
 
     if (left_idx == -1 || right_idx == -1) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Column not found for join" << std::endl;
         return result;
     }
@@ -341,7 +343,7 @@ std::shared_ptr<CSVTable> CSVDatabase::join(const std::shared_ptr<CSVTable>& oth
 
 std::shared_ptr<CSVTable> FastCSVDatabase::join(const std::shared_ptr<CSVTable>& other,
                                                  const std::string& left_col,
-                                                 const std::string& right_col) override {
+                                                 const std::string& right_col) {
     auto result = std::make_shared<CSVTable>();
     result->headers = headers;
     result->headers.insert(result->headers.end(), other->headers.begin(), other->headers.end());
@@ -350,7 +352,7 @@ std::shared_ptr<CSVTable> FastCSVDatabase::join(const std::shared_ptr<CSVTable>&
     int right_idx = other->getColumnIndex(right_col);
 
     if (left_idx == -1 || right_idx == -1) {
-        std::lock_guard<std::mutex> lock(console_mutex);
+        // std::lock_guard<std::mutex> lock(console_mutex);
         std::cerr << "Column not found for join" << std::endl;
         return result;
     }
@@ -391,6 +393,97 @@ std::shared_ptr<CSVTable> FastCSVDatabase::join(const std::shared_ptr<CSVTable>&
     }
 
     return result;
+}
+
+bool CSVDatabase::saveToFile(const std::string& filename) const {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        // std::lock_guard<std::mutex> lock(console_mutex);
+        std::cerr << "Error opening file for writing: " << filename << std::endl;
+        return false;
+    }
+
+    // Write headers
+    for (size_t i = 0; i < headers.size(); ++i) {
+        file << headers[i];
+        if (i < headers.size() - 1) file << ",";
+    }
+    file << "\n";
+
+    // Write data rows
+    for (const auto& row : *data) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            file << row[i];
+            if (i < row.size() - 1) file << ",";
+        }
+        file << "\n";
+    }
+
+    file.close();
+    return true;
+}
+
+bool FastCSVDatabase::saveToFile(const std::string& filename) const {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        // std::lock_guard<std::mutex> lock(console_mutex);
+        std::cerr << "Error opening file for writing: " << filename << std::endl;
+        return false;
+    }
+
+    // Write headers first (single-threaded)
+    for (size_t i = 0; i < headers.size(); ++i) {
+        file << headers[i];
+        if (i < headers.size() - 1) file << ",";
+    }
+    file << "\n";
+
+    // Close the main file temporarily
+    file.close();
+
+    // Multithreaded approach: each thread writes to a separate string buffer
+    std::vector<std::string> thread_buffers(num_threads);
+    size_t rows_per_thread = (data->size() + num_threads - 1) / num_threads;
+    std::vector<std::thread> threads;
+
+    for (size_t t = 0; t < num_threads; ++t) {
+        threads.emplace_back([this, &thread_buffers, t, rows_per_thread](size_t thread_id) {
+            size_t start = thread_id * rows_per_thread;
+            size_t end = std::min(start + rows_per_thread, data->size());
+            
+            std::ostringstream buffer;
+            for (size_t i = start; i < end; ++i) {
+                const auto& row = (*data)[i];
+                for (size_t j = 0; j < row.size(); ++j) {
+                    buffer << row[j];
+                    if (j < row.size() - 1) buffer << ",";
+                }
+                buffer << "\n";
+            }
+            thread_buffers[thread_id] = buffer.str();
+        }, t);
+    }
+
+    // Wait for all threads to complete
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    // Reopen file in append mode and write all buffers sequentially
+    // Note: Order doesn't matter for multithreaded variant as mentioned
+    file.open(filename, std::ios::app);
+    if (!file.is_open()) {
+        // std::lock_guard<std::mutex> lock(console_mutex);
+        std::cerr << "Error reopening file for appending: " << filename << std::endl;
+        return false;
+    }
+
+    for (const auto& buffer : thread_buffers) {
+        file << buffer;
+    }
+
+    file.close();
+    return true;
 }
 
 

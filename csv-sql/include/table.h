@@ -15,27 +15,24 @@ using Row = std::vector<std::string>;
 using Table = std::vector<Row>;
 
 class CSVTable {
-private:
+protected:
     std::shared_ptr<Table> data;
     std::vector<std::string> headers;
-
-protected:
+    
     CSVTable() : data(std::make_shared<Table>()) {}
+    int getColumnIndex(const std::string& column);
+    Row parseCSVLine(const std::string& line);
 
 public:
     virtual bool loadFromFile(const std::string & filepath) = 0;
     virtual std::shared_ptr<CSVTable> sort(const std::string & column, bool ascending) = 0;
     virtual std::shared_ptr<CSVTable> filter(const std::string& column, const std::string& value) = 0;
     virtual std::shared_ptr<CSVTable> join(const std::shared_ptr<CSVTable>& other, const std::string& left_col, const std::string& right_col) = 0;
+    virtual bool saveToFile(const std::string& filename) const = 0;
     
     void print(size_t max_rows = 0);
     size_t getRowCount() const;
     size_t getColumnCount() const;
-    bool saveToFile(const std::string& filename) const;
-
-private:
-    int getColumnIndex(const std::string& column);
-    Row parseCSVLine(const std::string& line);
 };
 
 class FastCSVDatabase : public CSVTable {
@@ -46,7 +43,8 @@ public:
     FastCSVDatabase(size_t threads = 4) 
         : CSVTable(), num_threads(threads) {}
 
-    bool loadFromFile(const std::string& filename);
+    bool saveToFile(const std::string& filename) const override;
+    bool loadFromFile(const std::string& filename) override;
     std::shared_ptr<CSVTable> sort(const std::string& column, bool ascending = true) override;
     std::shared_ptr<CSVTable> filter(const std::string& column, const std::string& value) override;
     std::shared_ptr<CSVTable> join(const std::shared_ptr<CSVTable>& other, const std::string& left_col, const std::string& right_col) override;
@@ -62,7 +60,8 @@ class CSVDatabase : public CSVTable {
 public:
     CSVDatabase() : CSVTable() {}
 
-    bool loadFromFile(const std::string& filename);
+    bool saveToFile(const std::string& filename) const override;
+    bool loadFromFile(const std::string& filename) override;
     std::shared_ptr<CSVTable> sort(const std::string& column, bool ascending = true) override;
     std::shared_ptr<CSVTable> filter(const std::string& column, const std::string& value) override;
     std::shared_ptr<CSVTable> join(const std::shared_ptr<CSVTable>& other, const std::string& left_col, const std::string& right_col) override;
