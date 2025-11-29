@@ -25,7 +25,27 @@ public:
             {"security", "encryption", "authentication", "password", "cryptography", 
             "attack", "vulnerability", "protection", "firewall", "threat", "malware"},
             {"software", "development", "programming", "code", "testing", 
-            "debugging", "version", "control", "agile", "deployment", "refactoring"}
+            "debugging", "version", "control", "agile", "deployment", "refactoring"},
+            {"cloud", "computing", "virtual", "container", "docker", "kubernetes",
+            "microservices", "scalability", "infrastructure", "deployment", "serverless", "aws"},
+            {"algorithm", "complexity", "optimization", "sorting", "searching", "graph",
+            "tree", "dynamic", "programming", "recursive", "hashing", "efficiency"},
+            {"mobile", "application", "android", "ios", "native", "responsive",
+            "touch", "interface", "user", "experience", "design", "platform"},
+            {"blockchain", "cryptocurrency", "bitcoin", "ethereum", "decentralized",
+            "smart", "contract", "mining", "ledger", "consensus", "token", "wallet"},
+            {"artificial", "intelligence", "cognitive", "reasoning", "expert", "system",
+            "knowledge", "inference", "pattern", "recognition", "vision", "processing"},
+            {"network", "protocol", "tcp", "ip", "routing", "switching",
+            "bandwidth", "latency", "packet", "transmission", "ethernet", "wireless"},
+            {"compiler", "interpreter", "parsing", "lexical", "syntax", "semantic",
+            "optimization", "code", "generation", "assembly", "bytecode", "runtime"},
+            {"operating", "system", "kernel", "process", "thread", "scheduling",
+            "memory", "management", "file", "system", "driver", "synchronization"},
+            {"graphics", "rendering", "shader", "texture", "polygon", "lighting",
+            "animation", "gpu", "opengl", "directx", "rasterization", "pipeline"},
+            {"testing", "unit", "integration", "automation", "coverage", "assertion",
+            "mock", "stub", "regression", "continuous", "quality", "validation"}
         };
         
         std::cout << "Generating sample documents...\n";

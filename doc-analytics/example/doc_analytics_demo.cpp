@@ -15,56 +15,57 @@ int main(int argc, char* argv[]) {
         std::cout << "\n";
     }
     
-    // // Collect all text files
-    // std::vector<std::string> filePaths;
-    // for (const auto& entry : fs::directory_iterator(docDirectory)) {
-    //     if (entry.path().extension() == ".txt") {
-    //         filePaths.push_back(entry.path().string());
-    //     }
-    // }
+    // Collect all text files
+    std::vector<std::string> filePaths;
+    for (const auto& entry : fs::directory_iterator(docDirectory)) {
+        std::cout << "Found: " << entry.path() << " (ext: " << entry.path().extension() << ")\n";
+        if (entry.path().extension() == ".txt") {
+            filePaths.push_back(entry.path().string());
+        }
+    }
     
-    // if (filePaths.empty()) {
-    //     std::cerr << "Error: No .txt files found in " << docDirectory << "\n";
-    //     return 1;
-    // }
+    if (filePaths.empty()) {
+        std::cerr << "Error: No .txt files found in " << docDirectory << "\n";
+        return 1;
+    }
     
-    // std::cout << "Found " << filePaths.size() << " documents\n";
-    // std::cout << "Processing with " << std::thread::hardware_concurrency() 
-    //           << " threads...\n\n";
+    std::cout << "Found " << filePaths.size() << " documents\n";
+    std::cout << "Processing with " << std::thread::hardware_concurrency() 
+              << " threads...\n\n";
     
-    // // Create shared collection
-    // auto collection = std::make_shared<DocumentCollection>();
+    // Create shared collection
+    auto collection = std::make_shared<DocumentCollection>();
     
-    // // Process documents in parallel
-    // std::vector<std::thread> threads;
-    // std::vector<std::unique_ptr<DocumentProcessor>> processors;
+    // Process documents in parallel
+    std::vector<std::thread> threads;
+    std::vector<std::unique_ptr<DocumentProcessor>> processors;
     
-    // for (const auto& path : filePaths) {
-    //     auto processor = std::make_unique<DocumentProcessor>(path, collection);
-        
-    //     threads.emplace_back([&processor]() {
-    //         processor->process();
-    //     });
-        
-    //     processors.push_back(std::move(processor));
-    // }
+    for (const auto& path : filePaths) {
+        processors.push_back(std::make_unique<DocumentProcessor>(path, collection));
+    }
     
-    // // Wait for all processing to complete
-    // for (auto& t : threads) {
-    //     t.join();
-    // }
+    for (auto& processor : processors) {
+        threads.emplace_back([&processor]() {
+            processor->process();
+        });
+    }
     
-    // std::cout << "Processed " << collection->getDocumentCount() << " documents\n";
-    // std::cout << "Vocabulary size: " << collection->getVocabulary().size() << " unique terms\n\n";
+    // Wait for all processing to complete
+    for (auto& t : threads) {
+        t.join();
+    }
     
-    // // Compute TF-IDF matrix
-    // TFIDFMatrix tfidf(collection);
-    // tfidf.compute();
+    std::cout << "Processed " << collection->getDocumentCount() << " documents\n";
+    std::cout << "Vocabulary size: " << collection->getVocabulary().size() << " unique terms\n\n";
     
-    // // Display results
-    // tfidf.printTopTermsPerDocument(10);
-    // tfidf.printMatrix(15);
-    // tfidf.exportToCSV("tfidf_matrix.csv");
+    // Compute TF-IDF matrix
+    TFIDFMatrix tfidf(collection);
+    tfidf.compute();
+    
+    // Display results
+    tfidf.printTopTermsPerDocument(10);
+    tfidf.printMatrix(15);
+    tfidf.exportToCSV("output/tfidf_matrix.csv");
     
     return 0;
 }
